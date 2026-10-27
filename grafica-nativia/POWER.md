@@ -4,7 +4,7 @@ displayName: "Gráfica Nativia"
 description: "Aplica la identidad visual de marca Nativia (Cloud & IA) y estándares de usabilidad de la industria (Nielsen, WCAG AA, Gestalt) a cualquier diseño o interfaz. Úsala al crear o revisar UI, componentes, landings, dashboards, presentaciones o piezas gráficas, para que el resultado siga la marca y NO sea un diseño genérico de IA."
 keywords: ["nativia", "diseño", "design", "marca", "branding", "ui", "ux", "usabilidad", "wcag", "accesibilidad", "dashboard", "landing", "componentes", "identidad visual", "cloud", "ia"]
 author: "Nativia"
-version: "1.3.0"
+version: "1.4.0"
 license: "UNLICENSED"
 ---
 

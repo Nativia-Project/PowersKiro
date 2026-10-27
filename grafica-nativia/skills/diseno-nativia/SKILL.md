@@ -32,11 +32,28 @@ Aplica a UI web/app, componentes, landings, dashboards, y también presentacione
    - Revisar tambien `references/presentaciones-slides.md` (manejo del logo y su aire con
      object-fit: cover, encabezado absoluto que no empuja el contenido, centrado vertical,
      navegacion por flechas, portada y cierre con isotipo grande, agenda navegable, PDF).
-4. Para logos, usar los archivos reales en `assets/logos/` (incluidos en este Power):
+   - **TRANSFORMAR / CONVERTIR un contenido que ya viene hecho NO es editar ese archivo.**
+     Cuando pidan "transforma esta presentacion a la marca", "convierte este HTML", "aplica la
+     marca Nativia a esto" o similar, y entreguen un HTML, borrador u otra presentacion: ese
+     material es fuente de CONTENIDO (textos, cifras, estructura narrativa), nunca de estructura
+     visual ni de estilos. El procedimiento correcto es:
+       1. Partir de `assets/plantillas/deck-base.html` (o deck-seguimiento) como esqueleto.
+       2. Leer el material de entrada y extraer su contenido textual completo, sin alterarlo
+          (no cambiar cifras, nombres propios ni redaccion).
+       3. Verter ese contenido dentro de la estructura de la plantilla, slide por slide, usando
+          sus layouts de marca.
+       4. Descartar por completo el andamiaje del material original (su <nav>, sus estilos, su
+          paleta, sus iconos emoji): NO se recolorea el archivo viejo, se reconstruye sobre la
+          plantilla.
+     Recolorear el archivo recibido en vez de reconstruir sobre la plantilla es el error a evitar:
+     deja la presentacion sin logo de portada, sin logo de header, sin agenda navegable, sin la
+     barra de navegacion inferior de marca, y a veces con una franja/nav ajeno arriba.
+5. Para logos, usar los archivos reales en `assets/logos/` (incluidos en este Power):
    - `isotipo-fondo-claro.svg` / `isotipo-sinfondo-claro.svg` → sobre fondo claro (blanco).
    - `isotipo-fondo-oscuro.svg` / `isotipo-sinfondo-oscuro.svg` → sobre fondo oscuro (Azul Profundo).
    - Preferir SVG; usar la variante "sinfondo" cuando se quiera integrar sin recuadro.
-5. **Antes de entregar**, correr el checklist de cierre (abajo).
+6. **Antes de entregar**, correr el checklist de cierre (abajo); si es presentacion, tambien el
+   checklist especifico de presentaciones.
 
 > Todas las rutas (`references/`, `assets/`) son relativas a esta carpeta de skill, que viaja
 > dentro del Power. No dependen de rutas absolutas de ninguna máquina en particular.
@@ -81,6 +98,33 @@ Aplica a UI web/app, componentes, landings, dashboards, y también presentacione
 - [ ] Ningún "tell" de IA de `anti-generico-ia.md`.
 - [ ] Logo correcto (SVG; variante según fondo) si aplica.
 - [ ] Cada decisión tiene justificación de marca o usabilidad.
+
+## Checklist especifico de presentaciones (verificar ADEMAS del de cierre)
+
+Aplica a toda presentacion o deck de slides, sea creado de cero o transformado desde un contenido
+existente. No dar por lista la presentacion hasta que TODOS estos puntos se cumplan y se verifiquen
+(leyendo el HTML final o abriendolo en el navegador):
+
+- [ ] Construida sobre `assets/plantillas/deck-base.html` (o deck-seguimiento), no sobre el
+      andamiaje de un archivo recibido.
+- [ ] Portada con isotipo grande (cover-hero), sin logo de header en la portada.
+- [ ] Logo de marca arriba a la DERECHA (slide-head / brand-mark) en las slides de contenido e
+      intro de seccion; variante clara sobre fondo oscuro, variante a color sobre blanco.
+- [ ] Slide de agenda navegable: cada item salta a su slide con clic o Enter (data-goto + JS).
+- [ ] Barra de navegacion inferior centrada y semitransparente (anterior / contador / siguiente),
+      boton Agenda (tecla M) y barra de progreso fina en Naranja arriba.
+- [ ] Contador de slides automatico (calculado con la cantidad real de slides).
+- [ ] NO queda ningun <nav> superior fijo ni franja ajena del archivo original.
+- [ ] Cero emojis en todo el HTML (ni como iconos de tarjeta ni en titulos).
+- [ ] Cero colores fuera de la paleta Nativia (sin cian/verde/morado/naranja neon ni gradientes
+      decorativos del material original).
+- [ ] Montserrat (titulos) e Inter (cuerpo) cargadas desde Google Fonts.
+- [ ] El motor de navegacion (flechas, teclado, swipe, agenda, contador) funciona.
+- [ ] Bloque @media print presente para exportar a PDF (una slide por pagina).
+- [ ] Rutas de los logos ajustadas segun donde quede el HTML (p. ej. `assets/` si esta en la raiz,
+      `../../assets/` si esta dos niveles bajo la raiz).
+- [ ] Si fue transformacion: el contenido textual (cifras, nombres propios, redaccion) quedo
+      IDENTICO al material de entrada; solo cambio la capa visual y la estructura.
 
 ## Límite honesto
 
