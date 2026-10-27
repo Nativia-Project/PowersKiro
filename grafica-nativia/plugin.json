@@ -1,15 +1,15 @@
-﻿{
+{
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "grafica-nativia",
-  "displayName": "Gru{00E1}fica Nativia v1.4.0",
+  "displayName": "Gráfica Nativia v1.4.0",
   "version": "1.4.0",
-  "description": "v1.4.0 u{00B7} v1.4.0 Â· Aplica la identidad visual de marca Nativia (Cloud & IA) y estÃ¡ndares de usabilidad de la industria (Nielsen, WCAG AA, Gestalt) a cualquier diseÃ±o o interfaz. Ãšsala al crear o revisar UI, componentes, landings, dashboards, presentaciones o piezas grÃ¡ficas, para que el resultado siga la marca y NO sea un diseÃ±o genÃ©rico de IA.",
+  "description": "v1.4.0 · Aplica la identidad visual de marca Nativia (Cloud & IA) y estándares de usabilidad de la industria (Nielsen, WCAG AA, Gestalt) a cualquier diseño o interfaz. Úsala al crear o revisar UI, componentes, landings, dashboards, presentaciones o piezas gráficas, para que el resultado siga la marca y NO sea un diseño genérico de IA.",
   "author": {
     "name": "Nativia"
   },
   "keywords": [
     "nativia",
-    "diseÃ±o",
+    "diseño",
     "design",
     "marca",
     "branding",
