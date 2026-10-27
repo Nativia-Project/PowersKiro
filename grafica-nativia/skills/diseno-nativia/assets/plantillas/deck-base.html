@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Introducción a AWS · Capacitación Nativia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  /* ===== Tokens de marca Nativia (Manual de Identidad Visual V2) ===== */
+  :root {
+    --azul-profundo: #0A2A43;
+    --azul-medio-oscuro: #164264;
+    --azul-medio-claro: #225B86;
+    --azul-acento: #3075A9;
+    --naranja: #F39221;
+    --gris: #58595B;
+    --blanco: #FFFFFF;
+    --texto: #0A2A43;
+    --texto-suave: #58595B;
+
+    --font-titulo: 'Montserrat', sans-serif;
+    --font-cuerpo: 'Inter', sans-serif;
+
+    /* Escala tipográfica (razón ~1.25) */
+    --fs-xs: 0.75rem;
+    --fs-sm: 0.875rem;
+    --fs-base: 1rem;
+    --fs-lg: 1.25rem;
+    --fs-xl: 1.5rem;
+    --fs-2xl: 1.953rem;
+    --fs-3xl: 2.441rem;
+    --fs-4xl: 3.052rem;
+
+    --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+    --sp-6: 24px; --sp-8: 32px; --sp-12: 48px; --sp-16: 64px; --sp-24: 96px;
+
+    --radio-sm: 4px; --radio-md: 8px; --radio-lg: 12px; --radio-pill: 9999px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: var(--font-cuerpo);
+    color: var(--texto);
+    background: var(--azul-profundo);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== Contenedor de slides ===== */
+  .deck { position: relative; width: 100vw; height: 100vh; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    padding: clamp(165px, 20vh, 190px) clamp(48px, 6vw, 96px) clamp(24px, 4vh, 48px);
+    background: var(--blanco);
+    opacity: 0;
+    transition: opacity 0.45s ease;
+    overflow-y: auto;
+  }
+  .slide.active { display: flex; opacity: 1; z-index: 2; }
+
+  /* Fondo azul profundo para portadas y transiciones */
+  .slide.dark { background: var(--azul-profundo); color: var(--blanco); }
+  .slide.dark .kicker { color: var(--naranja); }
+  .slide.dark h1, .slide.dark h2 { color: var(--blanco); }
+  .slide.dark .lead { color: #D6E2EC; }
+
+  /* ===== Marca: franja superior ===== */
+  .slide-head {
+    position: absolute;
+    top: clamp(20px, 3vh, 40px);
+    left: clamp(48px, 6vw, 96px);
+    right: clamp(48px, 6vw, 96px);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    z-index: 3;
+  }
+  .brand-mark { display: flex; align-items: center; gap: var(--sp-3); }
+  /* El SVG del logo es un lienzo cuadrado con aire arriba/abajo.
+     Recortamos SOLO ese aire vertical con un alto de caja menor que el ancho,
+     usando object-fit: cover + position centrada. Nunca corta los lados (texto). */
+  .brand-mark img {
+    width: 300px;
+    height: 150px;
+    object-fit: cover;
+    object-position: center 46%;
+    display: block;
+  }
+  .slide:not(.dark) .brand-mark .logo-dark { display: none; }
+  .slide.dark .brand-mark .logo-light { display: none; }
+
+  .brand-word {
+    font-family: var(--font-titulo);
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    line-height: 1;
+  }
+  .brand-word .n { font-size: var(--fs-xl); color: var(--azul-profundo); }
+  .slide.dark .brand-word .n { color: var(--blanco); }
+  .brand-word .tag {
+    display: block;
+    font-family: var(--font-cuerpo);
+    font-weight: 400;
+    font-size: var(--fs-xs);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gris);
+    margin-top: 2px;
+  }
+  .slide.dark .brand-word .tag { color: var(--azul-acento); }
+
+  /* ===== Tipografía de contenido ===== */
+  .slide-body {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-width: 1600px;
+    width: 100%;
+    margin: auto; /* centra si cabe; con overflow-y en .slide, scrollea si no cabe */
+    padding-bottom: 72px; /* deja aire para la barra de navegación inferior */
+  }
+
+  .kicker {
+    font-family: var(--font-titulo);
+    font-weight: 700;
+    font-size: var(--fs-base);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--azul-medio-claro);
+    margin-bottom: var(--sp-3);
+  }
+
+  h1 {
+    font-family: var(--font-titulo);
+    font-weight: 800;
+    font-size: clamp(2rem, 5.2vw, 3.6rem);
+    line-height: 1.05;
+    color: var(--azul-profundo);
+    letter-spacing: -0.5px;
+  }
+  h2 {
+    font-family: var(--font-titulo);
+    font-weight: 700;
+    font-size: clamp(2rem, 4.2vw, 3.2rem);
+    line-height: 1.08;
+    color: var(--azul-profundo);
+    letter-spacing: -0.3px;
+    margin-bottom: var(--sp-8);
+  }
+  h3 {
+    font-family: var(--font-titulo);
+    font-weight: 700;
+    font-size: var(--fs-xl);
+    color: var(--azul-medio-oscuro);
+  }
+
+  .lead {
+    font-size: clamp(1.25rem, 2vw, 1.7rem);
+    font-weight: 300;
+    line-height: 1.5;
+    color: var(--texto-suave);
+    max-width: 62ch;
+    margin-top: var(--sp-6);
+  }
+
+  p { font-weight: 400; line-height: 1.55; color: var(--texto-suave); }
+
+  .accent-rule {
+    width: 72px; height: 5px; border-radius: var(--radio-pill);
+    background: var(--naranja); margin-bottom: var(--sp-6);
+  }
+
+  /* ===== Layouts reutilizables ===== */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-8); }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-8); }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-6); }
+
+  .card {
+    background: var(--blanco);
+    border: 1px solid #E4E9EE;
+    border-left: 5px solid var(--azul-medio-claro);
+    border-radius: var(--radio-md);
+    padding: var(--sp-8);
+  }
+  .card.accent { border-left-color: var(--naranja); }
+  .card h3 { margin-bottom: var(--sp-3); }
+  .card p { font-size: var(--fs-lg); line-height: 1.5; }
+
+  .slide.dark .card {
+    background: #0E3253;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-left: 4px solid var(--azul-acento);
+  }
+  .slide.dark .card.accent { border-left-color: var(--naranja); }
+  .slide.dark .card h3 { color: #BCD2E2; }
+  .slide.dark .card p { color: #C6D4E0; }
+
+  .num-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 52px; height: 52px; border-radius: var(--radio-pill);
+    background: var(--azul-profundo); color: var(--blanco);
+    font-family: var(--font-titulo); font-weight: 700; font-size: var(--fs-lg);
+    margin-bottom: var(--sp-4);
+  }
+  .card.accent .num-badge { background: var(--naranja); }
+
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: var(--sp-4); margin-top: var(--sp-6); }
+  ul.clean li { position: relative; padding-left: 34px; font-size: clamp(1.15rem, 1.7vw, 1.5rem); line-height: 1.4; color: var(--texto); font-weight: 400; }
+  ul.clean li::before {
+    content: ""; position: absolute; left: 0; top: 0.5em;
+    width: 12px; height: 12px; border-radius: 2px; background: var(--naranja);
+  }
+  .slide.dark ul.clean li { color: #E4EDF4; }
+
+  .pill-row { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin-top: var(--sp-6); }
+  .pill {
+    font-family: var(--font-cuerpo); font-weight: 500; font-size: var(--fs-base);
+    padding: 10px 20px; border-radius: var(--radio-pill);
+    background: #EEF3F7; color: var(--azul-medio-oscuro);
+  }
+  .pill.on { background: var(--azul-profundo); color: var(--blanco); }
+  .pill.ac { background: var(--naranja); color: var(--blanco); }
+
+  .two-col { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: var(--sp-16); align-items: center; }
+
+  /* ===== Slide de cierre: solo logo grande + ¿Dudas? ===== */
+  .slide.closing { padding: clamp(32px, 6vh, 72px) clamp(40px, 7vw, 110px); justify-content: center; align-items: center; }
+  .closing-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-8); height: 100%; }
+  .closing-logo {
+    width: clamp(340px, 42vw, 620px);
+    max-height: 62vh;
+    height: auto; display: block;
+    filter: drop-shadow(0 24px 60px rgba(0,0,0,0.35));
+  }
+  .closing-title {
+    font-family: var(--font-titulo); font-weight: 800;
+    font-size: clamp(2.8rem, 6vw, 5rem); color: var(--blanco); line-height: 1;
+  }
+
+  /* ===== Portada: layout e isotipo grande ===== */
+  /* La portada no tiene logo en el head, así que recupera padding-top normal */
+  .slide.cover-slide { padding-top: clamp(28px, 4.5vh, 56px); }
+
+  .cover { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-12); align-items: center; height: 100%; }
+  .cover-hero { display: flex; align-items: center; justify-content: center; }
+  .cover-hero img {
+    width: clamp(380px, 46vw, 680px);
+    max-height: 78vh;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 24px 60px rgba(0,0,0,0.35));
+    animation: cover-float 6s ease-in-out infinite;
+  }
+  @keyframes cover-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-14px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cover-hero img { animation: none; }
+  }
+
+  .stat { font-family: var(--font-titulo); font-weight: 800; font-size: var(--fs-4xl); color: var(--naranja); line-height: 1; }
+  .stat-label { font-size: var(--fs-base); color: var(--texto-suave); margin-top: var(--sp-2); }
+
+  /* ===== Métricas grandes (slide comercial) ===== */
+  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-8); margin-top: var(--sp-4); }
+  .metric { text-align: left; }
+  .metric .big {
+    font-family: var(--font-titulo); font-weight: 800;
+    font-size: clamp(3rem, 6vw, 5rem); line-height: 1; color: var(--naranja);
+  }
+  .metric .cap { font-size: var(--fs-lg); color: var(--texto); font-weight: 500; margin-top: var(--sp-3); line-height: 1.35; }
+  .slide.dark .metric .cap { color: #E4EDF4; }
+
+  /* ===== Logos de clientes (wordmarks de texto) ===== */
+  .logos-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-3); margin-top: var(--sp-4); }
+  .logo-chip {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px;
+    min-height: 88px; padding: var(--sp-3);
+    background: #fff; border: 1px solid #E4E9EE; border-top: 4px solid var(--azul-medio-claro); border-radius: var(--radio-md);
+    font-family: var(--font-titulo); font-weight: 700; font-size: var(--fs-lg);
+    color: var(--azul-profundo); line-height: 1.15;
+  }
+  .logo-chip span { display: block; font-family: var(--font-cuerpo); font-weight: 400; font-size: var(--fs-sm); color: var(--gris); margin-top: 0; letter-spacing: 0.2px; }
+
+  /* ===== Tabla de modelos de cobro ===== */
+  .pricing { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-6); margin-top: var(--sp-4); }
+  .price-card {
+    background: #fff; border: 1px solid #E4E9EE; border-top: 5px solid var(--azul-medio-claro);
+    border-radius: var(--radio-md); padding: var(--sp-6);
+  }
+  .price-card.accent { border-top-color: var(--naranja); }
+  .price-card h3 { margin-bottom: var(--sp-2); }
+  .price-card p { font-size: var(--fs-base); line-height: 1.45; }
+  .price-card .tagline { font-family: var(--font-cuerpo); font-weight: 600; color: var(--azul-medio-claro); font-size: var(--fs-sm); display: block; margin-bottom: var(--sp-2); }
+
+  .note { font-size: var(--fs-lg); color: var(--gris); margin-top: var(--sp-8); font-style: normal; line-height: 1.55; max-width: 90ch; }
+
+  /* ===== Consola AWS mock ===== */
+  .console {
+    border-radius: var(--radio-lg); overflow: hidden;
+    border: 1px solid #D9DEE3; background: #fff;
+    box-shadow: 0 12px 40px rgba(10,42,67,0.14);
+  }
+  .console-top { background: var(--azul-profundo); display: flex; align-items: center; gap: var(--sp-3); padding: 12px 16px; }
+  .console-top .dots { display: flex; gap: 6px; }
+  .console-top .dots span { width: 11px; height: 11px; border-radius: 50%; background: rgba(255,255,255,0.35); }
+  .console-top .url { flex: 1; background: rgba(255,255,255,0.1); border-radius: var(--radio-sm); padding: 5px 12px; font-size: var(--fs-xs); color: #CFE0EC; letter-spacing: 0.3px; }
+  .console-top .url { font-size: var(--fs-sm); }
+  .console-body { padding: var(--sp-8); background: #F6F8FA; }
+  .console-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-6); }
+  .console-row { display: flex; gap: var(--sp-4); }
+  .console-tile {
+    flex: 1; background: #fff; border: 1px solid #E4E9EE;
+    border-top: 4px solid var(--azul-medio-claro);
+    border-radius: var(--radio-md); padding: var(--sp-6);
+  }
+  .console-tile.accent { border-top-color: var(--naranja); }
+  .console-tile .svc { font-family: var(--font-titulo); font-weight: 700; color: var(--azul-profundo); font-size: var(--fs-xl); display: block; }
+  .console-tile .cat {
+    display: inline-block; font-family: var(--font-cuerpo); font-weight: 600;
+    font-size: var(--fs-xs); letter-spacing: 1px; text-transform: uppercase;
+    color: var(--azul-medio-claro); margin-bottom: var(--sp-2);
+  }
+  .console-tile .svc small { display: block; font-family: var(--font-cuerpo); font-weight: 400; color: var(--gris); font-size: var(--fs-base); line-height: 1.4; margin-top: var(--sp-2); }
+
+  /* ===== Diagrama de jerarquía Organizations ===== */
+  .org-tree { display: flex; flex-direction: column; align-items: center; gap: 0; margin-top: var(--sp-4); }
+  .org-node { padding: 12px 20px; border-radius: var(--radio-md); font-family: var(--font-titulo); font-weight: 700; font-size: var(--fs-base); text-align: center; }
+  .org-root { background: var(--azul-profundo); color: #fff; }
+  .org-ou { background: var(--azul-medio-claro); color: #fff; font-size: var(--fs-base); width: 100%; }
+  .org-acct { background: #EEF3F7; color: var(--azul-medio-oscuro); font-weight: 600; font-size: var(--fs-sm); border: 1px solid #D9DEE3; }
+  .org-connector { width: 3px; height: 22px; background: #C3CED7; }
+
+  .org-branches {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: var(--sp-6); width: 100%;
+    padding-top: var(--sp-6); position: relative;
+  }
+  /* Línea horizontal que une las tres ramas */
+  .org-branches::before {
+    content: ""; position: absolute; top: 0; left: 16.6%; right: 16.6%;
+    height: 3px; background: #C3CED7;
+  }
+  .org-branch { display: flex; flex-direction: column; align-items: center; position: relative; }
+  /* Conector vertical desde la línea hacia cada OU */
+  .org-branch::before {
+    content: ""; position: absolute; top: calc(-1 * var(--sp-6)); left: 50%;
+    width: 3px; height: var(--sp-6); background: #C3CED7;
+  }
+  .org-accts { display: flex; flex-direction: column; gap: var(--sp-3); width: 100%; margin-top: var(--sp-4); position: relative; }
+  .org-accts::before {
+    content: ""; position: absolute; top: calc(-1 * var(--sp-4)); left: 50%;
+    width: 3px; height: var(--sp-4); background: #C3CED7;
+  }
+
+  /* ===== Gráfico: responsabilidad compartida (dos pilas) ===== */
+  .resp { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-6); margin-top: var(--sp-4); }
+  .resp-col { border-radius: var(--radio-lg); overflow: hidden; border: 1px solid #E4E9EE; }
+  .resp-col .resp-head {
+    font-family: var(--font-titulo); font-weight: 700; color: #fff;
+    padding: var(--sp-4) var(--sp-6); font-size: var(--fs-lg);
+  }
+  .resp-col.aws .resp-head { background: var(--azul-profundo); }
+  .resp-col.you .resp-head { background: var(--naranja); }
+  .resp-head small { display: block; font-family: var(--font-cuerpo); font-weight: 400; font-size: var(--fs-sm); opacity: 0.85; margin-top: 2px; }
+  .resp-layers { display: flex; flex-direction: column; gap: 2px; background: #E4E9EE; }
+  .resp-layer { background: #fff; padding: var(--sp-3) var(--sp-6); font-size: var(--fs-base); font-weight: 500; color: var(--azul-medio-oscuro); }
+  .resp-col.you .resp-layer { color: var(--azul-profundo); }
+
+  /* ===== Grilla de servicios de seguridad (por categoría) ===== */
+  .sec-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-6); margin-top: var(--sp-4); }
+  .sec-cat {
+    background: #fff; border: 1px solid #E4E9EE; border-left: 5px solid var(--azul-medio-claro);
+    border-radius: var(--radio-md); padding: var(--sp-6);
+  }
+  .sec-cat.accent { border-left-color: var(--naranja); }
+  .sec-cat h3 { font-size: var(--fs-lg); color: var(--azul-profundo); margin-bottom: var(--sp-4); }
+  .sec-svcs { display: flex; flex-direction: column; gap: var(--sp-3); }
+  .sec-svc { display: grid; grid-template-columns: 180px 1fr; gap: var(--sp-4); align-items: baseline; }
+  .sec-svc b { font-family: var(--font-titulo); font-weight: 700; color: var(--azul-medio-oscuro); font-size: var(--fs-base); }
+  .sec-svc span { font-size: var(--fs-sm); color: var(--texto-suave); line-height: 1.35; }
+
+  /* ===== Gráfico: stack de IA en 3 capas ===== */
+  .ai-stack { display: flex; flex-direction: column; gap: var(--sp-4); margin-top: var(--sp-4); }
+  .ai-layer {
+    display: grid; grid-template-columns: 240px 1fr; align-items: center; gap: var(--sp-6);
+    border-radius: var(--radio-lg); padding: var(--sp-6); border: 1px solid #E4E9EE;
+  }
+  .ai-layer.top { background: #FEF3E6; border-color: #F7C78A; }
+  .ai-layer.mid { background: #EAF1F7; border-color: #BCD4E6; }
+  .ai-layer.base { background: #F6F8FA; }
+  .ai-layer .ai-name {
+    font-family: var(--font-titulo); font-weight: 800; color: var(--azul-profundo);
+    font-size: var(--fs-xl); line-height: 1.15;
+  }
+  .ai-layer .ai-name small { display: block; font-family: var(--font-cuerpo); font-weight: 500; font-size: var(--fs-sm); color: var(--gris); margin-top: var(--sp-1); }
+  .ai-layer .ai-svcs { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+  .ai-svc {
+    display: inline-flex; flex-direction: column; background: #fff; border: 1px solid #E4E9EE;
+    border-radius: var(--radio-md); padding: var(--sp-3) var(--sp-4); min-width: 120px;
+  }
+  .ai-svc b { font-family: var(--font-titulo); font-weight: 700; color: var(--azul-medio-oscuro); font-size: var(--fs-base); }
+  .ai-svc span { font-size: var(--fs-xs); color: var(--gris); margin-top: 2px; }
+  .ai-svc.k { border-color: var(--naranja); border-width: 2px; }
+  .ai-svc.k b { color: var(--naranja); }
+
+  /* ===== Gráfico: modelos de cómputo (VM / contenedores / serverless) ===== */
+  .compute-scale { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-6); margin-top: var(--sp-4); }
+  .compute-col {
+    border: 1px solid #E4E9EE; border-radius: var(--radio-lg); overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .compute-col .cc-head {
+    padding: var(--sp-4) var(--sp-6); color: #fff;
+    font-family: var(--font-titulo); font-weight: 700; font-size: var(--fs-lg);
+  }
+  .compute-col.vm .cc-head { background: var(--azul-medio-oscuro); }
+  .compute-col.ct .cc-head { background: var(--azul-medio-claro); }
+  .compute-col.sl .cc-head { background: var(--naranja); }
+  .cc-head small { display: block; font-family: var(--font-cuerpo); font-weight: 400; font-size: var(--fs-sm); opacity: 0.9; margin-top: 2px; }
+  .cc-body { padding: var(--sp-6); display: flex; flex-direction: column; gap: var(--sp-4); flex: 1; }
+  .cc-svc { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+  .cc-svc .pill { background: #EEF3F7; }
+  .cc-desc { font-size: var(--fs-base); color: var(--texto-suave); line-height: 1.45; }
+  .cc-manage { font-size: var(--fs-sm); font-weight: 500; }
+  .cc-manage b { font-family: var(--font-titulo); }
+
+  .scale-bar {
+    display: grid; grid-template-columns: repeat(3, 1fr); margin-top: var(--sp-6);
+    border-radius: var(--radio-pill); overflow: hidden; font-size: var(--fs-sm);
+    font-family: var(--font-cuerpo); font-weight: 600; text-align: center; color: #fff;
+  }
+  .scale-bar span { padding: 10px 8px; }
+  .scale-bar .s1 { background: var(--azul-medio-oscuro); }
+  .scale-bar .s2 { background: var(--azul-medio-claro); }
+  .scale-bar .s3 { background: var(--naranja); }
+
+  /* ===== Métricas de infraestructura global ===== */
+  .region-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-4); margin: var(--sp-2) 0 var(--sp-6); }
+  .rstat {
+    background: #F6F8FA; border: 1px solid #E4E9EE; border-radius: var(--radio-md);
+    padding: var(--sp-4) var(--sp-6); text-align: center;
+  }
+  .rstat.accent { background: var(--azul-profundo); border-color: var(--azul-profundo); }
+  .rstat .rn { display: block; font-family: var(--font-titulo); font-weight: 800; font-size: clamp(1.8rem, 3.2vw, 2.6rem); line-height: 1; color: var(--naranja); }
+  .rstat .rl { display: block; font-size: var(--fs-sm); color: var(--texto-suave); margin-top: var(--sp-2); font-weight: 500; }
+  .rstat.accent .rn { color: var(--naranja); }
+  .rstat.accent .rl { color: #CFE0EC; }
+
+  /* ===== Gráfico: Región con Zonas de Disponibilidad ===== */
+  .region-box {
+    border: 3px dashed var(--azul-acento); border-radius: var(--radio-lg);
+    padding: var(--sp-6); margin-top: var(--sp-4); background: #F6F9FC;
+  }
+  .region-label {
+    display: inline-flex; align-items: center; gap: var(--sp-2);
+    font-family: var(--font-titulo); font-weight: 700; color: var(--azul-profundo);
+    font-size: var(--fs-lg); margin-bottom: var(--sp-4);
+  }
+  .region-label::before { content: ""; width: 14px; height: 14px; border-radius: 3px; background: var(--azul-acento); }
+  .az-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-4); }
+  .az {
+    background: #fff; border: 1px solid #D9DEE3; border-top: 4px solid var(--azul-medio-claro);
+    border-radius: var(--radio-md); padding: var(--sp-4);
+  }
+  .az .az-title { font-family: var(--font-titulo); font-weight: 700; color: var(--azul-medio-oscuro); font-size: var(--fs-base); margin-bottom: var(--sp-3); }
+  .az .dc { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-sm); color: var(--gris); margin-top: var(--sp-1); }
+  .az .dc::before { content: ""; width: 20px; height: 14px; border-radius: 2px; background: var(--azul-acento); opacity: 0.25; flex-shrink: 0; }
+
+  /* ===== Agenda / timeline ===== */
+  .agenda { display: flex; flex-direction: column; gap: var(--sp-4); margin-top: var(--sp-6); }
+  .agenda-item { display: grid; grid-template-columns: 72px 1fr auto; align-items: center; gap: var(--sp-6); padding: var(--sp-6); border-radius: var(--radio-md); background: #F6F8FA; border: 1px solid transparent; }
+  .agenda-item[data-goto] { cursor: pointer; transition: background 0.18s ease, border-color 0.18s ease, transform 0.08s ease; }
+  .agenda-item[data-goto]:hover { background: #EAF1F7; border-color: var(--azul-acento); }
+  .agenda-item[data-goto]:active { transform: scale(0.995); }
+  .agenda-item[data-goto]:focus-visible { outline: 3px solid var(--naranja); outline-offset: 2px; }
+  .agenda-item .go { font-family: var(--font-titulo); font-weight: 700; color: var(--azul-acento); font-size: var(--fs-lg); opacity: 0; transition: opacity 0.18s ease; white-space: nowrap; }
+  .agenda-item[data-goto]:hover .go { opacity: 1; }
+  .agenda-item .t {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 56px; height: 56px; border-radius: var(--radio-pill);
+    background: var(--azul-profundo); color: #fff;
+    font-family: var(--font-titulo); font-weight: 800; font-size: var(--fs-xl);
+  }
+  .agenda-item[data-goto]:hover .t { background: var(--naranja); }
+  .agenda-item .l { font-family: var(--font-cuerpo); font-weight: 500; color: var(--azul-profundo); font-size: var(--fs-2xl); line-height: 1.25; }
+  .agenda-item .d { font-size: var(--fs-lg); color: var(--gris); }
+
+  /* ===== Controles de navegación (semitransparentes, abajo) ===== */
+  .nav {
+    position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
+    z-index: 50; display: flex; align-items: center; gap: var(--sp-3);
+    background: rgba(10,42,67,0.28);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: var(--radio-pill);
+    padding: 8px 10px;
+    opacity: 0.55; transition: opacity 0.25s ease;
+    user-select: none;
+  }
+  .nav:hover { opacity: 1; }
+
+  /* Sobre slides claras, oscurecemos el control para contraste */
+  .slide.active:not(.dark) ~ .nav { background: rgba(10,42,67,0.30); }
+
+  .nav button {
+    width: 44px; height: 44px; min-width: 44px;
+    border: none; cursor: pointer;
+    border-radius: var(--radio-pill);
+    background: rgba(255,255,255,0.14);
+    color: #fff; font-size: 18px; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s ease, transform 0.1s ease;
+  }
+  .nav button:hover { background: var(--naranja); }
+  .nav button:focus-visible { outline: 3px solid var(--naranja); outline-offset: 2px; }
+  .nav button:active { transform: scale(0.94); }
+  .nav button:disabled { opacity: 0.35; cursor: default; }
+  .nav button:disabled:hover { background: rgba(255,255,255,0.14); }
+
+  .nav .counter {
+    font-family: var(--font-titulo); font-weight: 700;
+    color: #fff; font-size: var(--fs-sm); letter-spacing: 1px;
+    padding: 0 var(--sp-3); min-width: 64px; text-align: center;
+  }
+
+  /* Botón volver al menú (flotante, arriba a la derecha) */
+  .menu-btn {
+    position: fixed; bottom: 22px; right: 24px; z-index: 55;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-titulo); font-weight: 700; font-size: var(--fs-sm);
+    color: #fff; cursor: pointer;
+    background: rgba(10,42,67,0.28);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: var(--radio-pill);
+    padding: 10px 18px; min-height: 44px;
+    opacity: 0.55; transition: opacity 0.2s ease, background 0.2s ease;
+  }
+  .menu-btn:hover { opacity: 1; background: var(--naranja); }
+  .menu-btn:focus-visible { outline: 3px solid var(--naranja); outline-offset: 2px; opacity: 1; }
+  .menu-btn .menu-ico { font-size: 16px; line-height: 1; }
+  /* Oculto en portada, agenda y cierre (no aporta ahí) */
+  .menu-btn.hidden { display: none; }
+
+  /* Barra de progreso fina arriba */
+  .progress { position: fixed; top: 0; left: 0; height: 4px; background: var(--naranja); z-index: 60; transition: width 0.35s ease; }
+
+  /* Indicador de atajos */
+  .hint { position: fixed; right: 20px; bottom: 26px; z-index: 50; font-size: var(--fs-xs); color: rgba(255,255,255,0.0); transition: color 0.3s; }
+
+  @media (max-width: 820px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .metrics { grid-template-columns: 1fr; gap: var(--sp-6); }
+    .logos-grid { grid-template-columns: repeat(2, 1fr); }
+    .ai-grid { grid-template-columns: repeat(2, 1fr); }
+    .sec-grid { grid-template-columns: 1fr; }
+    .sec-svc { grid-template-columns: 140px 1fr; }
+    .pricing { grid-template-columns: 1fr; }
+    .org-branches { grid-template-columns: 1fr; }
+    .org-branches::before, .org-branch::before { display: none; }
+    .two-col { grid-template-columns: 1fr; gap: var(--sp-8); }
+    .cover { grid-template-columns: 1fr; gap: var(--sp-8); }
+    .cover-hero { order: -1; }
+    .cover-hero img { width: clamp(240px, 70vw, 420px); }
+    .brand-mark img { height: 110px; }
+  }
+
+  /* ===== Exportar a PDF: todas las slides, una por página (horizontal) =====
+     Cómo usar: Ctrl+P -> Guardar como PDF -> Tamaño Tabloid (el que mejor calza
+     16:9), 1 página por hoja, Márgenes predeterminado, "Gráficos en segundo plano"
+     ACTIVADO. Cada slide sale completa y centrada, sin cortar el logo. */
+  @media print {
+    @page { size: landscape; margin: 0; }
+
+    html, body { height: auto !important; overflow: visible !important; background: #fff !important; }
+
+    .deck { position: static !important; width: auto !important; height: auto !important; display: block !important; }
+
+    .slide {
+      position: relative !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      opacity: 1 !important;
+      inset: auto !important;
+      left: auto !important; top: auto !important; right: auto !important; bottom: auto !important;
+      width: 100% !important;
+      height: 100vh !important;
+      box-sizing: border-box !important;
+      padding: 5vh 6vw !important;
+      margin: 0 !important;
+      overflow: hidden !important;
+      page-break-after: always !important;
+      break-after: page !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+    .slide:last-of-type { page-break-after: auto !important; break-after: auto !important; }
+
+    .slide.cover-slide, .slide.closing { padding: 5vh 6vw !important; }
+
+    /* Encabezado dentro de cada página, con aire para no cortar el logo */
+    .slide-head { position: absolute !important; top: 3vh !important; left: 6vw !important; right: 6vw !important; align-items: center !important; }
+    /* Logo prominente: caja con cover recorta SOLO el aire del SVG, no el texto */
+    .brand-mark img { width: 200px !important; height: 88px !important; object-fit: cover !important; object-position: center 46% !important; }
+
+    /* El cuerpo se centra en la página; colchón mínimo para no chocar el logo */
+    .slide-body { padding-top: 9vh !important; padding-bottom: 3vh !important; max-width: 100% !important; justify-content: center !important; }
+
+    /* Ocultar controles de navegación en el PDF */
+    .nav, .menu-btn, .progress, .hint { display: none !important; }
+
+    /* Imprimir los fondos de color (azul, naranja, etc.) */
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+    .cover-hero img { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<div class="deck" id="deck">
+
+  <!-- ============ SLIDE 1 · PORTADA ============ -->
+  <section class="slide dark cover-slide active">
+    <div class="slide-body">
+      <div class="cover">
+        <div>
+          <div class="accent-rule"></div>
+          <p class="kicker">Sesión introductoria</p>
+          <h1>Introducción a<br/>Amazon Web Services</h1>
+          <p class="lead">Qué es la nube de AWS, cómo se organiza y los fundamentos para operar con buenas prácticas de arquitectura y seguridad desde el primer día.</p>
+          <div class="pill-row">
+            <span class="pill on">Fundamentos</span>
+            <span class="pill on">Consola &amp; cuentas</span>
+            <span class="pill on">Seguridad e identidad</span>
+            <span class="pill ac">Buenas prácticas</span>
+          </div>
+        </div>
+        <div class="cover-hero">
+          <img src="../assets/logo-oscuro.svg" alt="Isotipo Nativia" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 2 · AGENDA ============ -->
+  <section class="slide">
+    <div class="slide-head">
+      <div class="brand-mark">
+        <img class="logo-light" src="../assets/logo-claro.svg" alt="Nativia" />
+      </div>
+    </div>
+    <div class="slide-body">
+      <p class="kicker">Lo que veremos hoy</p>
+      <h2>Agenda de la sesión</h2>
+      <div class="agenda">
+        <div class="agenda-item" data-goto="2" role="link" tabindex="0"><span class="t">1</span><span class="l">¿Qué es AWS? Escala, clientes y precios</span><span class="go">Ir &#8594;</span></div>
+        <div class="agenda-item" data-goto="7" role="link" tabindex="0"><span class="t">2</span><span class="l">Infraestructura: responsabilidad, regiones y zonas</span><span class="go">Ir &#8594;</span></div>
+        <div class="agenda-item" data-goto="10" role="link" tabindex="0"><span class="t">3</span><span class="l">Organizations, cuentas e Identity Center</span><span class="go">Ir &#8594;</span></div>
+        <div class="agenda-item" data-goto="13" role="link" tabindex="0"><span class="t">4</span><span class="l">IAM y mínimo privilegio</span><span class="go">Ir &#8594;</span></div>
+        <div class="agenda-item" data-goto="17" role="link" tabindex="0"><span class="t">5</span><span class="l">Well-Architected y Landing Zone</span><span class="go">Ir &#8594;</span></div>
+        <div class="agenda-item" data-goto="20" role="link" tabindex="0"><span class="t">6</span><span class="l">Cómputo, servicios, datos, IA y consola</span><span class="go">Ir &#8594;</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE · TRANSICIÓN SECCIÓN FUNDAMENTOS ============ -->
+  <section class="slide dark section-intro">
+    <div class="slide-head">
+      <div class="brand-mark"><img class="logo-light" src="../assets/logo-oscuro.svg" alt="Nativia" /></div>
+    </div>
+    <div class="slide-body">
+      <div class="accent-rule"></div>
+      <p class="kicker">Sección 1</p>
+      <h1>¿Qué es AWS?<br/>Escala, clientes y precios</h1>
+      <p class="lead">Por qué AWS es el líder de la nube: su escala, quién lo usa y cómo cobra.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <!--  CONTENIDO · reemplaza estas slides de muestra por las tuyas.  -->
+  <!--  Manten el patron: seccion.slide con slide-head y slide-body. -->
+  <!--  Usa .slide.dark para portadas, transiciones y cierre.         -->
+  <!--  Layouts: grid-2/3/4, card(.accent), two-col, metrics,         -->
+  <!--  logos-grid, pricing, console, org-tree, ul.clean, pill-row.   -->
+  <!--  ¿Necesitas un layout que no está aqui? Cópialo de index.html. -->
+  <!-- ============================================================= -->
+
+  <!-- ====== MUESTRA · slide de contenido (two-col + lista + cards) ====== -->
+  <section class="slide">
+    <div class="slide-head">
+      <div class="brand-mark"><img class="logo-light" src="../assets/logo-claro.svg" alt="Nativia" /></div>
+    </div>
+    <div class="slide-body">
+      <p class="kicker">Kicker de la slide</p>
+      <h2>Titulo de una slide de contenido</h2>
+      <div class="two-col">
+        <div>
+          <p class="lead" style="margin-top:0">Idea principal de la slide en una o dos frases claras. Una idea por slide.</p>
+          <ul class="clean">
+            <li>Punto de apoyo uno</li>
+            <li>Punto de apoyo dos</li>
+            <li>Punto de apoyo tres</li>
+          </ul>
+        </div>
+        <div class="grid-2" style="gap:var(--sp-4)">
+          <div class="card"><div class="num-badge">1</div><h3>Concepto</h3><p>Descripcion breve del concepto.</p></div>
+          <div class="card accent"><div class="num-badge">2</div><h3>Destacado</h3><p>Una sola card .accent por slide.</p></div>
+          <div class="card"><div class="num-badge">3</div><h3>Concepto</h3><p>Descripcion breve del concepto.</p></div>
+          <div class="card"><div class="num-badge">4</div><h3>Concepto</h3><p>Descripcion breve del concepto.</p></div>
+        </div>
+      </div>
+      <p class="note">Toda cifra o afirmacion fuerte lleva su fuente aqui. (Fuente: ...)</p>
+    </div>
+  </section>
+
+  <!-- ====== MUESTRA · transicion de seccion (oscura) ====== -->
+  <section class="slide dark section-intro">
+    <div class="slide-head">
+      <div class="brand-mark"><img class="logo-light" src="../assets/logo-oscuro.svg" alt="Nativia" /></div>
+    </div>
+    <div class="slide-body">
+      <div class="accent-rule"></div>
+      <p class="kicker">Seccion 2</p>
+      <h1>Titulo de la<br/>siguiente seccion</h1>
+      <p class="lead">Una frase que anticipa lo que viene en esta seccion.</p>
+    </div>
+  </section>
+
+  <!-- ====== MUESTRA · slide de impacto (metrics, 3 cifras) ====== -->
+  <section class="slide dark">
+    <div class="slide-head">
+      <div class="brand-mark"><img class="logo-light" src="../assets/logo-oscuro.svg" alt="Nativia" /></div>
+    </div>
+    <div class="slide-body">
+      <p class="kicker">En numeros</p>
+      <h2>El dato que convence</h2>
+      <div class="metrics">
+        <div class="metric"><div class="big">+00</div><div class="cap">Descripcion de la cifra uno</div></div>
+        <div class="metric"><div class="big">00%</div><div class="cap">Descripcion de la cifra dos</div></div>
+        <div class="metric"><div class="big">#1</div><div class="cap">Descripcion de la cifra tres</div></div>
+      </div>
+      <p class="note" style="color:#AEC2D2">Fuente de las cifras. (Fuente: ...)</p>
+    </div>
+  </section>
+  <!-- ============ SLIDE · RESUMEN ============ -->
+  <section class="slide">
+    <div class="slide-head">
+      <div class="brand-mark"><img class="logo-light" src="../assets/logo-claro.svg" alt="Nativia" /></div>
+    </div>
+    <div class="slide-body">
+      <p class="kicker">Lo que nos llevamos</p>
+      <h2>Resumen de la sesión</h2>
+      <div class="grid-2">
+        <ul class="clean">
+          <li><strong>AWS</strong> es nube bajo demanda: pagas por uso y escalas al instante.</li>
+          <li><strong>Regiones, AZ y Local Zones</strong> dan presencia global y tolerancia a fallos.</li>
+          <li><strong>Organizations</strong> ordena múltiples cuentas; <strong>Identity Center</strong> centraliza el acceso.</li>
+          <li><strong>IAM</strong> y el <strong>mínimo privilegio</strong> definen quién hace qué.</li>
+          <li><strong>Seguridad por capas:</strong> identidad, datos, detección (GuardDuty, Security Hub) y red.</li>
+        </ul>
+        <ul class="clean">
+          <li><strong>Well-Architected</strong> y la <strong>Landing Zone</strong> aseguran construir bien desde el inicio.</li>
+          <li>Cómputo flexible: <strong>VM, contenedores y serverless</strong>.</li>
+          <li>Stack de <strong>datos y Data Lake</strong>, y de <strong>IA</strong> (Bedrock, SageMaker AI, Nova).</li>
+          <li>La <strong>Consola</strong> es el centro de operación: revisa siempre región y cuenta.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE · CIERRE (solo logo + ¿Dudas?) ============ -->
+  <section class="slide dark closing">
+    <div class="closing-wrap">
+      <img src="../assets/logo-oscuro.svg" alt="Nativia" class="closing-logo" />
+      <h1 class="closing-title">¿Dudas?</h1>
+    </div>
+  </section>
+
+</div>
+
+<!-- ===== Botón volver al menú (agenda) ===== -->
+<button id="menuBtn" class="menu-btn" aria-label="Volver a la agenda" title="Volver a la agenda (M)">
+  <span class="menu-ico">&#9776;</span> Agenda
+</button>
+
+<!-- ===== Navegación semitransparente, centrada abajo ===== -->
+<nav class="nav" aria-label="Navegación de diapositivas">
+  <button id="prev" aria-label="Diapositiva anterior" title="Anterior (←)">&#8592;</button>
+  <span class="counter" id="counter">1 / 15</span>
+  <button id="next" aria-label="Diapositiva siguiente" title="Siguiente (→)">&#8594;</button>
+</nav>
+
+<script>
+  (function () {
+    var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+    var total = slides.length;
+    var current = 0;
+
+    var prevBtn = document.getElementById('prev');
+    var nextBtn = document.getElementById('next');
+    var counter = document.getElementById('counter');
+    var progress = document.getElementById('progress');
+    var menuBtn = document.getElementById('menuBtn');
+    var AGENDA_INDEX = 1;
+
+    function render() {
+      slides.forEach(function (s, i) { s.classList.toggle('active', i === current); });
+      counter.textContent = (current + 1) + ' / ' + total;
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === total - 1;
+      progress.style.width = ((current + 1) / total * 100) + '%';
+      // El botón Menú no aparece en portada, agenda ni en la última slide (cierre)
+      var hide = (current === 0 || current === AGENDA_INDEX || current === total - 1);
+      menuBtn.classList.toggle('hidden', hide);
+    }
+
+    menuBtn.addEventListener('click', function () { go(AGENDA_INDEX); });
+
+    function go(n) {
+      current = Math.max(0, Math.min(total - 1, n));
+      render();
+    }
+
+    nextBtn.addEventListener('click', function () { go(current + 1); });
+    prevBtn.addEventListener('click', function () { go(current - 1); });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(current + 1); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(current - 1); }
+      else if (e.key === 'Home') { go(0); }
+      else if (e.key === 'End') { go(total - 1); }
+      else if (e.key === 'm' || e.key === 'M') { go(AGENDA_INDEX); }
+    });
+
+    // Agenda navegable: clic o teclado en cada ítem salta a su slide
+    Array.prototype.forEach.call(document.querySelectorAll('.agenda-item[data-goto]'), function (item) {
+      var target = parseInt(item.getAttribute('data-goto'), 10);
+      item.addEventListener('click', function () { if (!isNaN(target)) go(target); });
+      item.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); if (!isNaN(target)) go(target); }
+      });
+    });
+
+    // Navegación táctil (swipe) para tablet/móvil
+    var startX = null;
+    document.addEventListener('touchstart', function (e) { startX = e.touches[0].clientX; }, { passive: true });
+    document.addEventListener('touchend', function (e) {
+      if (startX === null) return;
+      var dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) > 50) { go(current + (dx < 0 ? 1 : -1)); }
+      startX = null;
+    }, { passive: true });
+
+    render();
+  })();
+</script>
+
+</body>
+</html>

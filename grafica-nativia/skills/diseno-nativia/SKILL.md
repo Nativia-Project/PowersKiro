@@ -18,10 +18,20 @@ Aplica a UI web/app, componentes, landings, dashboards, y también presentacione
 2. Si el trabajo es UI/interacción, revisar también
    `references/principios-usabilidad.md` (heurísticas, leyes UX, WCAG, Gestalt).
 3. Tener presente `references/anti-generico-ia.md` y evitar activamente cada "tell".
-4. Si el trabajo es una presentacion o slides HTML navegables, revisar tambien
-   `references/presentaciones-slides.md` (manejo del logo y su aire con object-fit: cover,
-   encabezado absoluto que no empuja el contenido, centrado vertical, navegacion por flechas,
-   portada y cierre con isotipo grande).
+4. Si el trabajo es una presentacion o slides HTML navegables:
+   - PARTIR SIEMPRE de la plantilla incluida en el Power: `assets/plantillas/deck-base.html`
+     (o `assets/plantillas/deck-seguimiento.html` para reuniones de seguimiento con Carta Gantt).
+     NO reconstruir el andamiaje de memoria. La plantilla ya trae: tokens, estilos, header con
+     logo arriba a la derecha, portada con isotipo grande, agenda navegable, barra de navegacion
+     inferior centrada, barra de progreso en Naranja, bloque @media print para exportar a PDF y
+     el motor de navegacion (flechas, teclado, swipe, contador automatico). Copiar la plantilla y
+     verter el contenido dentro de su estructura; no inventar un andamiaje propio.
+   - Los logos que la plantilla referencia viajan en `assets/plantillas/assets/` (logo-claro.svg,
+     logo-oscuro.svg, isotipo-color.png). Al copiar la plantilla a una presentacion concreta,
+     ajustar la ruta relativa de `../assets/logo-*.svg` segun donde quede el HTML.
+   - Revisar tambien `references/presentaciones-slides.md` (manejo del logo y su aire con
+     object-fit: cover, encabezado absoluto que no empuja el contenido, centrado vertical,
+     navegacion por flechas, portada y cierre con isotipo grande, agenda navegable, PDF).
 4. Para logos, usar los archivos reales en `assets/logos/` (incluidos en este Power):
    - `isotipo-fondo-claro.svg` / `isotipo-sinfondo-claro.svg` → sobre fondo claro (blanco).
    - `isotipo-fondo-oscuro.svg` / `isotipo-sinfondo-oscuro.svg` → sobre fondo oscuro (Azul Profundo).
