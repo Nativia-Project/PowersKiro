@@ -1,0 +1,16 @@
+# Sistema operativo
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editores / IDE
+.vscode/
+.idea/
+
+# Comprimidos temporales
+*.zip
+
+# Credenciales y secretos (nunca subir)
+*.env
+*client_secret*
+*token*.json
