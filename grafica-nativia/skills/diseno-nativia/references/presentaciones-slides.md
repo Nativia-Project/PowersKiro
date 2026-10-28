@@ -96,6 +96,12 @@ o `center` y cada slide larga se parte en varias paginas (el PDF no scrollea).
 - La portada NO lleva logo ni encabezado (el head queda vacio o se omite). Lleva el isotipo grande
   centrado en el cuerpo. Dale una clase propia (.cover-slide) y recupera el
   padding-top normal, porque no hay logo arriba que compensar.
+- La portada MUESTRA LA FECHA. Va junto al kicker (ej. "COMITE EJECUTIVO · 28 de octubre de 2026").
+  Por defecto es la fecha ACTUAL y se rellena sola al abrir el archivo, para no editarla cada vez:
+  un `<span data-fecha-hoy></span>` dentro del kicker y un bloque JS corto (IIFE con try/catch) que
+  pone en todo `[data-fecha-hoy]` la fecha de hoy en español ("D de mes de AAAA"). Si se necesita
+  una fecha fija (la de una reunión concreta), se escribe el texto directo en vez del span. El
+  separador "·" entre el kicker y la fecha se logra con un `::before` en el span de fecha.
 - El cierre recomendado: una sola diapositiva con el isotipo grande centrado y un
   texto corto ("Dudas?"). Sin encabezado ni mas elementos.
 
