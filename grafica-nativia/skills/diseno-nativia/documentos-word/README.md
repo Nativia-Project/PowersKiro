@@ -68,3 +68,13 @@ El .docx de entrada debe usar los estilos Title, Heading 1, Heading 2, List Bull
 - El documento se marca con idioma es-CL para el corrector de Word.
 - El script reordena las propiedades XML segun el esquema de Word (Word ignora las que quedan
   fuera de orden). Verificar el resultado abriendo el archivo en Word, no solo en LibreOffice.
+- Los numeros van en digitos, no escritos como palabras (por ejemplo 9 sensores, no nueve
+  sensores), en particular los conteos, cantidades, cifras, porcentajes y datos. Las expresiones
+  fijas del lenguaje pueden mantener la palabra cuando el digito resulte forzado. El script no
+  reescribe numeros: el texto fuente ya debe venir en digitos.
+- Los numeros que son cifras o datos van en negrita en el cuerpo del documento (prosa, vinetas y
+  celdas de tablas): conteos, cantidades, porcentajes, montos y valores. No se ponen en negrita
+  los numeros de titulos y encabezados, la numeracion de secciones, los numeros de pagina ni los
+  identificadores tecnicos que incluyan digitos (por ejemplo bank 1, us-east-1, un
+  diagnostic_id). El resaltado en negrita del cuerpo se expresa en el texto fuente con el
+  marcador que el script interpreta; el script no decide por si solo que numeros resaltar.
