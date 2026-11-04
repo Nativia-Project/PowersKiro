@@ -52,7 +52,11 @@ Aplica a UI web/app, componentes, landings, dashboards, y también presentacione
    - `isotipo-fondo-claro.svg` / `isotipo-sinfondo-claro.svg` → sobre fondo claro (blanco).
    - `isotipo-fondo-oscuro.svg` / `isotipo-sinfondo-oscuro.svg` → sobre fondo oscuro (Azul Profundo).
    - Preferir SVG; usar la variante "sinfondo" cuando se quiera integrar sin recuadro.
-6. **Antes de entregar**, correr el checklist de cierre (abajo); si es presentacion, tambien el
+6. Si el trabajo es un documento Word (.docx): seguir SOLO `documentos-word/README.md` y usar
+   su script `documentos-word/scripts/informe_docx_nativia.py` (portada a pagina completa en
+   Azul Profundo, indice, encabezados numerados, colores de texto y ortografia). Esas reglas son
+   exclusivas de Word: NO se aplican a las presentaciones HTML, que siguen el punto 4 sin cambios.
+7. **Antes de entregar**, correr el checklist de cierre (abajo); si es presentacion, tambien el
    checklist especifico de presentaciones.
 
 > Todas las rutas (`references/`, `assets/`) son relativas a esta carpeta de skill, que viaja

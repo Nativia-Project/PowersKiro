@@ -1,10 +1,10 @@
 ---
 name: "grafica-nativia"
-displayName: "Gráfica Nativia v1.4.1"
-description: "v1.4.1 · Aplica la identidad visual de marca Nativia (Cloud & IA) y estándares de usabilidad de la industria (Nielsen, WCAG AA, Gestalt) a cualquier diseño o interfaz. Úsala al crear o revisar UI, componentes, landings, dashboards, presentaciones o piezas gráficas, para que el resultado siga la marca y NO sea un diseño genérico de IA."
+displayName: "Gráfica Nativia v1.5.0"
+description: "v1.5.0 · Aplica la identidad visual de marca Nativia (Cloud & IA) y estándares de usabilidad de la industria (Nielsen, WCAG AA, Gestalt) a cualquier diseño o interfaz. Úsala al crear o revisar UI, componentes, landings, dashboards, presentaciones o piezas gráficas, para que el resultado siga la marca y NO sea un diseño genérico de IA."
 keywords: ["nativia", "diseño", "design", "marca", "branding", "ui", "ux", "usabilidad", "wcag", "accesibilidad", "dashboard", "landing", "componentes", "identidad visual", "cloud", "ia"]
 author: "Nativia"
-version: "1.4.1"
+version: "1.5.0"
 license: "UNLICENSED"
 ---
 
@@ -24,6 +24,9 @@ genérico de IA.
   portada, agenda, header de logo, nav inferior, barra de progreso y bloque de impresión a PDF) y
   `deck-seguimiento.html` (variante para reuniones de seguimiento con Carta Gantt). Incluyen sus
   logos en `assets/plantillas/assets/`. Son el punto de partida para construir cualquier deck.
+- **Documentos Word** (`documentos-word/`) — reglas y script para dar formato Nativia a un .docx
+  (portada a página completa, índice, numeración, colores y ortografía). Exclusivo de Word: no
+  modifica las plantillas ni las reglas de presentaciones HTML.
 - **Referencias de usabilidad** — heurísticas de Nielsen, leyes de UX, Gestalt y WCAG 2.1 AA.
 - **Catálogo anti-genérico** — los "tells" de diseño IA a evitar activamente.
 
@@ -36,6 +39,7 @@ grafica-nativia/
 └── skills/
     └── diseno-nativia/
         ├── SKILL.md                # Reglas, resumen de marca y checklist
+        ├── documentos-word/        # SOLO .docx: README, scripts y logos de portada/encabezado
         ├── references/
         │   ├── principios-usabilidad.md
         │   ├── presentaciones-slides.md
