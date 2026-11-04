@@ -10,6 +10,7 @@ Las presentaciones HTML NO se rigen por este apartado: siguen usando
 documentos-word/
 ├── README.md                          # Este documento (reglas de Word)
 ├── scripts/
+│   ├── md_a_docx_base.py              # Convierte un Markdown a .docx base (paso previo)
 │   ├── informe_docx_nativia.py        # Aplica el formato Nativia a un .docx
 │   └── logo_horizontal_sobre_azul.py  # Regenera el logo de portada desde el logo oficial
 └── assets/
@@ -22,8 +23,20 @@ documentos-word/
 Requisitos: python-docx y lxml. Opcional: LibreOffice (`soffice`) y `pdftotext` para que el
 indice salga con los numeros de pagina reales.
 
+El punto de partida recomendado es un archivo Markdown. El flujo de documentos Word tiene dos
+pasos encadenados: primero se genera un .docx base a partir del Markdown y luego se aplica el
+formato Nativia sobre ese .docx base.
+
+Paso 1. Generar el .docx base desde el Markdown con el conversor:
+
 ```
-python documentos-word/scripts/informe_docx_nativia.py --src entrada.docx --out salida.docx \
+python documentos-word/scripts/md_a_docx_base.py --src documento.md --out base.docx
+```
+
+Paso 2. Aplicar el formato Nativia al .docx base:
+
+```
+python documentos-word/scripts/informe_docx_nativia.py --src base.docx --out salida.docx \
   --kicker "INFORME EJECUTIVO  |  FASE 2" \
   --titulo "Titulo del documento" \
   --subtitulo "Proyecto o cliente" \
@@ -31,7 +44,15 @@ python documentos-word/scripts/informe_docx_nativia.py --src entrada.docx --out 
   --dato "Fecha=2026-11-03" --dato "Respaldo=ruta o referencia"
 ```
 
-El .docx de entrada debe usar los estilos Title, Heading 1, Heading 2, List Bullet y tablas.
+El conversor del paso 1 produce exactamente los estilos que el paso 2 espera (Title, Heading 1,
+Heading 2, List Bullet y tablas) y traduce los pares de negrita del Markdown (dobles asteriscos)
+al marcador interno que el script de marca resalta. De este modo se evita el defecto de construir
+el .docx base a mano en cada ocasion, que partia los parrafos (una linea por renglon) y rompia
+las tablas.
+
+Si ya se dispone de un .docx con los estilos correctos, se puede entrar directamente al paso 2.
+El .docx de entrada del paso 2 debe usar los estilos Title, Heading 1, Heading 2, List Bullet y
+tablas.
 
 ## Reglas del formato (implementadas en el script)
 
@@ -78,3 +99,16 @@ El .docx de entrada debe usar los estilos Title, Heading 1, Heading 2, List Bull
   identificadores tecnicos que incluyan digitos (por ejemplo bank 1, us-east-1, un
   diagnostic_id). El resaltado en negrita del cuerpo se expresa en el texto fuente con el
   marcador que el script interpreta; el script no decide por si solo que numeros resaltar.
+## Reglas del conversor md_a_docx_base.py
+
+- Une en un mismo parrafo las lineas de texto consecutivas que no esten separadas por una linea
+  en blanco, de modo que se evita el parrafo por renglon propio del ajuste a 80 columnas.
+- El primer encabezado de nivel 1 del Markdown se asigna al estilo Title; los encabezados de
+  nivel posterior se asignan a Heading 1 y Heading 2 segun su jerarquia.
+- Las vinetas del Markdown se asignan al estilo List Bullet.
+- Los bloques de tabla Markdown se construyen como tablas reales de Word de dos o tres columnas,
+  con su fila de cabecera.
+- Los pares de negrita del Markdown (dobles asteriscos) se traducen al marcador que interpreta
+  informe_docx_nativia.py para resaltar el texto.
+- La cabecera del documento (lineas de Proyecto, Falla, Fase, Fecha y Documento de respaldo) se
+  conserva como parrafos normales.

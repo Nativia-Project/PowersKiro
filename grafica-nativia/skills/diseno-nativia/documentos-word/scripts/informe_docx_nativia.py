@@ -45,6 +45,16 @@ def setfont(run,name,size,bold=False,color=None,italic=False):
     if rf is None: rf=OxmlElement('w:rFonts'); rpr.insert(0,rf)
     for a in ('w:ascii','w:hAnsi','w:cs','w:eastAsia'): rf.set(qn(a),name)
     if color is not None: run.font.color.rgb=color
+# NEGRITA_MARCADOR delimita los tramos a resaltar en negrita dentro del cuerpo de texto.
+# El texto fuente trae pares de este marcador (uno abre, el siguiente cierra); se usa un caracter
+# privado poco comun para no chocar con el contenido. emit_runs parte el texto en esos limites y
+# pone en negrita los tramos impares, dejando el resto en peso normal.
+NEGRITA_MARCADOR='\ue000'
+def emit_runs(par,texto,size,color,font=None):
+    font=font or CUERPO
+    for i,trozo in enumerate(texto.split(NEGRITA_MARCADOR)):
+        if not trozo: continue
+        r=par.add_run(trozo); setfont(r,font,size,i%2==1,color)
 def shade(cell,hexc):
     tcPr=cell._element.get_or_add_tcPr(); s=OxmlElement('w:shd')
     s.set(qn('w:val'),'clear'); s.set(qn('w:color'),'auto'); s.set(qn('w:fill'),hexc); tcPr.append(s)
@@ -154,7 +164,11 @@ def add_table(t):
                 shade(c,'0A2A43'); borders(c); r=p.add_run(txt); setfont(r,TITULO,9,True,RGBColor(255,255,255))
             else:
                 shade(c,'EEF2F6' if i%2==0 else 'FFFFFF'); borders(c,bottom=(4,'C9D3DC'))
-                r=p.add_run(txt); setfont(r,CUERPO,9.5,j==0,NEGRO)
+                if j==0 or NEGRITA_MARCADOR not in txt:
+                    # primera columna (encabezado de fila) siempre en negrita; o celda sin marcador
+                    r=p.add_run(txt.replace(NEGRITA_MARCADOR,'')); setfont(r,CUERPO,9.5,j==0,NEGRO)
+                else:
+                    emit_runs(p,txt,9.5,NEGRO)
         if i==0:
             trPr=nt.rows[0]._tr.get_or_add_trPr(); th=OxmlElement('w:tblHeader'); trPr.append(th)
         
@@ -213,16 +227,16 @@ for el in body.iterchildren():
             np_=d.add_paragraph(style='Heading 2'); r=np_.add_run(HTXT.get(el,txt)); setfont(r,TITULO,13,True,AZUL)
         elif s=='List Bullet':
             np_=d.add_paragraph(style='List Bullet'); spacing(np_,0,4)
-            r=np_.add_run(txt); setfont(r,CUERPO,10.5,False,NEGRO)
+            emit_runs(np_,txt,10.5,NEGRO)
         else:
             np_=d.add_paragraph(); spacing(np_,0,8); np_.alignment=WD_ALIGN_PARAGRAPH.LEFT
             m=re.match(r'^([^.:]{2,32}\.)\s(.+)$',txt,re.S)
             if m and len(m.group(1).split())>5: m=None
             if m:
                 r=np_.add_run(m.group(1)+' '); setfont(r,CUERPO,10.5,True,AZUL)
-                r=np_.add_run(m.group(2)); setfont(r,CUERPO,10.5,False,NEGRO)
+                emit_runs(np_,m.group(2),10.5,NEGRO)
             else:
-                r=np_.add_run(txt); setfont(r,CUERPO,10.5,False,NEGRO)
+                emit_runs(np_,txt,10.5,NEGRO)
     elif el in tmap:
         add_table(tmap[el])
 d.core_properties.title=A.titulo
